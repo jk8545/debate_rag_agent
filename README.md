@@ -1,71 +1,138 @@
-🧠 Multi-Agent Debate DAG using LangGraph
+# DebateFlow 🎭⚡
 
-Role: Machine Learning Intern
-Assignment: ATG Technical Assignment
-Tech Stack: Python · LangGraph · Groq LLM · Graphviz · CLI
-Deadline: 48 hours
+A LangGraph-powered multi-agent debate system with memory, control, logging, and automated judgment.
 
-📌 Overview
+DebateFlow simulates a structured AI debate between two expert personas — a Scientist and a Philosopher — using LangGraph DAGs and Groq LLMs. The system enforces strict turn control, preserves debate memory, logs every state transition, and concludes with an automated judge verdict.
 
-This project implements a multi-agent debate system using LangGraph, where two AI agents debate a given topic in a strictly controlled, turn-based manner.
+Built as part of a Machine Learning Intern technical assignment, with emphasis on clarity, control, and correctness.
 
-The system enforces:
 
-Exact round limits
+🌟 Features
 
-Turn order correctness
+## 🎯 Core Capabilities
 
-Debate memory tracking
+- Dual-Agent Architecture
+  - Scientist (evidence & risk-based) vs Philosopher (ethics & values-driven)
 
-Repetition prevention
+- Exactly 8 Rounds
+  - 4 turns per agent, strictly alternating — programmatically enforced
 
-Final judgment with reasoning
+- Memory-Aware Debate
+  - Incremental transcript + structured summary updated after each round
 
-The entire workflow is modeled as a Directed Acyclic Graph (DAG) and executed via a clean CLI interface, with full logging of every node and state transition.
+- Automated Judge
+  - Reviews full debate history and produces a final summary, winner declaration, and logical justification
 
-🎯 Objectives Met
+- Full CLI Experience
+  - Round-by-round output streamed to terminal and persistent JSON logging
 
-✔ Exactly 8 rounds (4 turns per agent, alternating)
-✔ Strict turn control (no agent speaks out of turn)
-✔ Memory preservation and incremental updates
-✔ Repetition detection to avoid duplicated arguments
-✔ Judge node producing summary + winner + justification
-✔ Persistent logging of all events
-✔ Graphviz DAG visualization
-✔ Deterministic execution (optional seed)
 
-🧩 System Architecture
+## 🔧 Technical Highlights
 
-The system is implemented as a LangGraph DAG, where each node represents a well-defined responsibility.
+- LangGraph DAG orchestration
+- Groq LLM integration (fast, free tier)
+- Hard turn enforcement and repetition detection
+- Logical flow validation and deterministic seed option
+- Persistent JSON Lines logging for auditing
+- Graphviz DAG visualization
 
-Core Nodes
-Node	Responsibility
-UserInputNode	Accepts and validates debate topic via CLI
-CoordinatorNode	Enforces turn order and round count
-AgentA (Scientist)	Produces structured, evidence-based arguments
-AgentB (Philosopher)	Produces conceptual and ethical arguments
-MemoryNode	Stores debate transcript and summary
-JudgeNode	Reviews full debate and declares winner
-LoggerNode	Logs every node input/output and state snapshot
-🔁 Debate Flow (High Level)
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.9+
+- A Groq API key (free tier available)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/jk8545/debate_rag_agent.git
+cd debate_rag_agent
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Environment Setup
+
+Create a `.env` file:
+
+```
+GROQ_API_KEY=your_groq_api_key_here
+```
+
+### Run the Debate
+
+```bash
+python run_debate.py
+```
+
+You’ll be prompted:
+
+```
+Enter topic for debate:
+```
+
+Example:
+
+```
+Should AI be regulated like medicine?
+```
+
+
+## 🏗️ System Architecture
+
+DebateFlow is implemented as a LangGraph DAG. Each node has a single responsibility; orchestration enforces a strict control loop so the debate always proceeds correctly and terminates after exactly 8 rounds.
+
+### 🔄 High-level Debate Workflow
+
+- UserInputNode — Accepts & validates topic
+- CoordinatorNode — Controls turn order and stops debate after 8 rounds
+- AgentA (Scientist) / AgentB (Philosopher) — Generate arguments according to persona prompts
+- MemoryNode — Stores transcript and updates a structured summary
+- JudgeNode — Evaluates debate and declares a winner
+- LoggerNode — Logs every node input/output and state snapshot
+
+Flow (simplified DAG):
+
 UserInput
    ↓
 Coordinator
    ↓
-AgentA / AgentB (alternating)
+AgentA ↔ AgentB (alternating)
    ↓
 Memory
    ↓
 Coordinator
    ↓
-Judge (after 8 rounds)
+Judge
    ↓
 END
 
-🧠 Memory Structure
+A visual DAG is generated using Graphviz:
 
-The debate memory is stored in a structured JSON format:
+```bash
+python generate_dag.py
+```
 
+Output:
+
+```
+dag.png
+```
+
+
+## 🧠 Memory & State
+
+Memory is stored as structured JSON and updated after each turn. Example memory snapshot:
+
+```json
 {
   "turns": [
     {
@@ -76,132 +143,32 @@ The debate memory is stored in a structured JSON format:
   ],
   "summary": "Running structured summary of the debate"
 }
+```
+
+Each agent receives the relevant context needed for the next turn (not an unbounded dump of the full state).
 
 
-Each agent only receives relevant memory context, not the full state.
+## ⚖️ Judge Logic
 
-⚖️ Judge Logic
+The JudgeNode reads the full transcript and structured summaries, validates logical progression and coherence, then emits:
 
-The JudgeNode:
+- Final summary
+- Winner declaration (Scientist or Philosopher)
+- Reasoned justification
 
-Reads the full debate transcript
+Example judge output:
 
-Checks logical progression and coherence
-
-Produces:
-
-A concise debate summary
-
-Winner declaration (AgentA or AgentB)
-
-A reasoned justification
-
-Example output:
-
+```
 [Judge]
 Winner: Scientist
 Reason: Presented grounded, risk-based arguments aligned with public safety principles.
-
-🖥️ CLI Usage
-Run the debate
-python run_debate.py
+```
 
 
-You will be prompted:
+## 📁 Project Structure
 
-Enter topic for debate: Should AI be regulated like medicine?
-
-Example Output
-[Round 1] Scientist: ...
-[Round 2] Philosopher: ...
-...
-[Round 8] Philosopher: ...
-
-[Judge]
-Summary of debate:
-...
-
-Winner: Scientist
-Reason: ...
-
-📝 Logging
-
-All node executions, state transitions, memory updates, and the final verdict are logged to a persistent JSON log file:
-
-logs/
- └── debate_log_YYYYMMDD_HHMMSS.json
-
-
-Each log entry includes:
-
-Timestamp
-
-Node name
-
-Input state
-
-Output state
-
-This makes the system fully auditable and debuggable.
-
-🖼️ DAG Visualization
-
-The debate workflow is visualized using Graphviz.
-
-Generate the DAG:
-
-python generate_dag.py
-
-
-This produces:
-
-dag.png
-
-
-The diagram clearly shows:
-
-Control flow
-
-Agent alternation
-
-Memory loop
-
-Final termination
-
-⚙️ Configuration (Optional)
-
-You may configure:
-
-Random seed (for deterministic behavior)
-
-Persona prompts
-
-Log file path
-
-Example (optional):
-
-python run_debate.py --seed 42 --log-path logs/
-
-🧪 Testing & Validation
-
-The system has been manually validated for:
-
-✅ Turn enforcement
-
-✅ Exact round count
-
-✅ Memory updates after each turn
-
-✅ Judge output correctness
-
-✅ Clean termination
-
-✅ Log file generation
-
-📁 Project Structure
-.
-├── run_debate.py
-├── generate_dag.py
+```
+debate_rag_agent/
 ├── nodes/
 │   ├── user_input_node.py
 │   ├── coordinator_node.py
@@ -213,34 +180,104 @@ The system has been manually validated for:
 │   ├── scientist.txt
 │   └── philosopher.txt
 ├── logs/
-│   └── debate_log_*.json
-├── dag.png
+│   └── debate_log_YYYYMMDD.json
+├── run_debate.py
+├── generate_dag.py
+├── requirements.txt
+├── .env.example
+├── .gitignore
 └── README.md
+```
 
-🎥 Demo Video (Included)
 
-The demo video shows:
+## 🎭 Agent Personas
 
-CLI execution
+### 🔬 Scientist
+- Focus: Evidence, risk analysis, empirical reasoning
+- Style: Structured, data-driven, pragmatic
+- Domains: Technology, safety, regulation, science
 
-Debate flow
+### 🧠 Philosopher
+- Focus: Ethics, human values, societal impact
+- Style: Nuanced, principled, reflective
+- Domains: Morality, autonomy, long-term consequences
 
-Judge decision
 
-Log file output
+## 📊 Sample CLI Output
 
-DAG visualization
+```
+Enter topic for debate: Should AI be regulated like medicine?
 
-🚀 Conclusion
+[Round 1] Scientist: AI systems deployed in healthcare...
+[Round 2] Philosopher: Ethical oversight must consider...
+...
+[Round 8] Philosopher: Historical precedent shows...
 
-This project demonstrates:
+[Judge]
+Winner: Scientist
+Reason: Provided more concrete, risk-based arguments aligned with public safety.
+```
 
-Controlled multi-agent orchestration
 
-Clean DAG-based reasoning workflows
+## 🧾 Logging & Auditing
 
-Strong separation of concerns
+Every run produces a persistent JSON Lines log containing timestamps, node inputs & outputs, state transitions, debate transcript, memory snapshots, and the final verdict.
 
-Robust state management and logging
+Example log entry (JSONL):
 
-It is designed to be extensible, auditable, and production-aligned, making it suitable as a foundation for more complex agent-based systems.
+```json
+{
+  "timestamp": "2025-01-12T18:42:11",
+  "event": "ROUND_OUTPUT",
+  "agent": "Scientist",
+  "round": 3,
+  "text": "AI regulation must prioritize..."
+}
+```
+
+
+## 🧪 Validation Rules
+
+- Turn order enforcement
+- Exactly 8 rounds
+- Repetition detection
+- Topic consistency checks
+- Judge must run exactly once
+
+
+## 🛠️ Built With
+
+- LangGraph — DAG-based agent orchestration
+- Groq LLM — Fast inference
+- Python — Core implementation
+- Graphviz — DAG visualization
+- python-dotenv — Environment management
+
+
+## 🎯 Use Cases
+
+- Academic: Debate & argumentation analysis, AI ethics education
+- Research: Multi-agent interaction modeling, LLM reasoning evaluation
+- Practical: Policy debate simulation, ethical review workflows
+
+
+## 📄 License
+
+MIT License — free to use, modify, and distribute.
+
+
+## 🙏 Acknowledgments
+
+LangGraph Team — clean agent orchestration
+Groq — blazing-fast LLM inference
+Open-source community — tools that made this possible
+
+
+## Contact
+
+If you run into issues or want to contribute, open an issue or submit a PR.
+
+
+---
+
+Updated README to better reflect system architecture, workflow, and practical usage.
