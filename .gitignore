@@ -1,0 +1,6 @@
+__pycache__/
+.env
+logs/
+*.log
+*.json
+dag.png
